@@ -14,10 +14,18 @@ RUN chown ${ISC_PACKAGE_MGRUSER}:${ISC_PACKAGE_IRISGROUP} /opt/irisapp
 USER ${ISC_PACKAGE_MGRUSER}
 
 COPY  src src
-COPY data/fhir fhirdata
 COPY iris.script /tmp/iris.script
 #COPY fhirUI /usr/irissys/csp/user/fhirUI
 
 # run iris and initial 
-RUN iris start IRIS \
-	&& iris session IRIS < /tmp/iris.script
+RUN iris start $ISC_PACKAGE_INSTANCENAME \
+    && printf 'Do ##class(Config.NLS.Locales).Install("jpuw") h\n' | iris session $ISC_PACKAGE_INSTANCENAME -U %SYS \
+	&& iris session $ISC_PACKAGE_INSTANCENAME < /tmp/iris.script \
+	&& iris stop $ISC_PACKAGE_INSTANCENAME quietly
+
+# for faster rebuild when data is modified 
+COPY data/fhir fhirdata
+COPY iris2.script /tmp/iris2.script
+# fhir data load phase
+RUN iris start $ISC_PACKAGE_INSTANCENAME \
+	&& iris session $ISC_PACKAGE_INSTANCENAME < /tmp/iris2.script

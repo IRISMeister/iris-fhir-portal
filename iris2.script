@@ -1,0 +1,8 @@
+zn "HSLIB"
+set namespace="FHIRSERVER"
+Set appKey = "/fhir/r4"
+zn namespace
+
+zw ##class(HS.FHIRServer.Tools.DataLoader).SubmitResourceFiles("/opt/irisapp/fhirdata/", namespace, appKey)
+
+halt
